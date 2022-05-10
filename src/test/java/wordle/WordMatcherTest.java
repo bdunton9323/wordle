@@ -4,8 +4,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +58,12 @@ public class WordMatcherTest {
     @Test
     public void testDoubleLetterYellow() {
         withDictionary("cool", "book", "boot");
-        int count = matcher.countMatchingWords("oo".toCharArray(), new Color[]{Color.YELLOW, Color.YELLOW});
+        int count = matcher.countMatchingWords("tool".toCharArray(),
+                new Color[]{Color.GRAY, Color.YELLOW, Color.YELLOW, Color.GRAY});
+        assertThat(count).isEqualTo(0);
+
+        count = matcher.countMatchingWords("oxxo".toCharArray(),
+                new Color[]{Color.YELLOW, Color.GRAY, Color.GRAY, Color.YELLOW});
         assertThat(count).isEqualTo(3);
     }
 
@@ -112,22 +119,51 @@ public class WordMatcherTest {
     }
 
     @Test
-    public void testDoubleLetters() {
+    public void testDoubleLetterInTarget() {
         withDictionary("aba", "bab");
         // the only way both a's can be yellow is if the target word has two A's. Not only are there no words with two
         // A's that aren't all green, but in a 3-letter word it's not possible for both A's to be wrong.
-        int count = matcher.countMatchingWords("aba".toCharArray(), new Color[]{Color.YELLOW, Color.YELLOW, Color.YELLOW});
+        int count = matcher.countMatchingWords("aba".toCharArray(),
+                new Color[]{Color.YELLOW, Color.YELLOW, Color.YELLOW});
         assertThat(count).isEqualTo(0);
 
-        count = matcher.countMatchingWords("aba".toCharArray(), new Color[]{Color.YELLOW, Color.YELLOW, Color.GRAY});
+        count = matcher.countMatchingWords("aba".toCharArray(),
+                new Color[]{Color.YELLOW, Color.YELLOW, Color.GRAY});
+        // should match "bab"
         assertThat(count).isEqualTo(1);
     }
 
-    private void withDictionary(String... words) {
-        when(wordIndex.getDictionaryCopy()).thenReturn(setOf(words));
+    @Test
+    public void testDoubleLetterInGuess() {
+        withDictionary("abc", "xyz");
+
+        // either of the C's could be yellow and the match would still be the same, so
+        // define the canonical representation to be the one where the leftmost occurrence is
+        // colored.
+        int count = matcher.countMatchingWords("cca".toCharArray(),
+                new Color[]{Color.YELLOW, Color.GRAY, Color.YELLOW});
+        assertThat(count).isEqualTo(1);
+
+        // valid color combination, but not the canonical form, so should not match
+        count = matcher.countMatchingWords("cca".toCharArray(),
+                new Color[]{Color.GRAY, Color.YELLOW, Color.YELLOW});
+        assertThat(count).isEqualTo(0);
+
+        count = matcher.countMatchingWords("bba".toCharArray(),
+                new Color[]{Color.GRAY, Color.GREEN, Color.YELLOW});
+        assertThat(count).isEqualTo(1);
+
+        // this pattern would indicate the target should have two B's, so it shouldn't be a match
+        count = matcher.countMatchingWords("abb".toCharArray(),
+                new Color[]{Color.GRAY, Color.GREEN, Color.YELLOW});
+        assertThat(count).isEqualTo(0);
     }
 
-    private Set<String> setOf(String... items) {
-        return new HashSet<>(Arrays.asList(items));
+    private void withDictionary(String... words) {
+        when(wordIndex.getDictionary()).thenReturn(listOf(words));
+    }
+
+    private List<String> listOf(String... items) {
+        return new ArrayList<>(Arrays.asList(items));
     }
 }
