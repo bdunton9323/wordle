@@ -36,32 +36,23 @@ public class SolverTest {
 
         when(indexBuilder.buildIndex(2)).thenReturn(wordIndex);
         solver = new Solver(2, indexBuilder);
-        // color -> entropy (how well does it split the dictionary)
-        // GG -> 0
-        // YY -> 0
-        // G- -> 1
-        // YG -> 0
-        // YY -> 0
-        // Y- -> 0
-        // -G -> 0
-        // -Y -> 0
-        // -- -> 1
-        double reduction = solver.findAverageReduction("an", 4);
-        assertThat(reduction).isEqualTo(1.0, offset(.0001d));
+        // the only colorings that give any info are:
+        // G-
+        // --
+        double reduction = solver.findAverageEntropy("an", 4);
+        assertThat(reduction).isEqualTo(0.28571, offset(.000005d));
 
-        // the only valid colorings that can arise are:
-        // Y- -> 0.8112 (splits it 75/25)
-        // -- -> 0.8112 (splits it 75/25)
-        reduction = solver.findAverageReduction("zp", 4);
-        assertThat(reduction).isEqualTo(0.811278124, offset(.0000000005d));
+        // the only colorings that give any info are:
+        // Y-
+        // --
+        reduction = solver.findAverageEntropy("zp", 4);
+        assertThat(reduction).isEqualTo(0.23179, offset(.000004d));
 
-        // TODO: why is this guess scored worse than an? It gives more information
-        //       the GG and G- cases both include ab as a match
-        // GG -> 0.8112 (75/25 split)
-        // G- -> 0.8112 (75/25 split)
-        // -- -> 1 (50/50 split)
-        reduction = solver.findAverageReduction("ab", 4);
-        assertThat(reduction).isEqualTo(0.874185416, offset(.0000000005d));
+        // GG
+        // G-
+        // --
+        reduction = solver.findAverageEntropy("ab", 4);
+        assertThat(reduction).isEqualTo(0.37465, offset(.000001d));
     }
 
     @Test
@@ -71,8 +62,8 @@ public class SolverTest {
 
         when(indexBuilder.buildIndex(5)).thenReturn(wordIndex);
         solver = new Solver(5, indexBuilder);
-        double reduction = solver.findAverageReduction("abcdx", 4);
-        assertThat(reduction).isEqualTo(0.5, offset(.01d));
+        double reduction = solver.findAverageEntropy("abcdx", 4);
+        assertThat(reduction).isEqualTo(0.01102, offset(.000001d));
     }
 
 }
