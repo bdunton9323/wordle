@@ -2,6 +2,7 @@ package wordle;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -62,14 +63,8 @@ public class Solver {
         double bestAverage = 0.0;
         String bestWord = null;
         for (String word : index.getDictionary()) {
-
-            // TODO: until I get double letters working, skip them
-            if (hasRepeatedLetter(word)) {
-                continue;
-            }
-
             tryNum++;
-            if (tryNum % 10 == 0) {
+            if (tryNum % 20 == 0) {
                 System.out.println("trying word #" + tryNum);
             }
 
@@ -131,6 +126,9 @@ public class Solver {
      */
     private void enumerate(char[] letters, int index, Color[] outcome, int numChoices, List<Double> probabilities) {
         if (index == wordLength) {
+            if (!isOutcomeValid(outcome)) {
+                return;
+            }
             // numChoices - countMatchingWords() is the number of words filtered out
             // a good guess is one that filters out a lot of words on average for any possible target picked at random
             //probabilities.add((numChoices - matcher.countMatchingWords(letters, outcome)) / (double) numChoices);
@@ -153,10 +151,12 @@ public class Solver {
             double pMatch = numMatching / (double) numChoices;
             double pNoMatch = (numChoices - numMatching) / (double) numChoices;
 
-            if (numMatching == 0) {
-                //probabilities.add(0.0);
-            } else {
+            if (numMatching != 0) {
                 probabilities.add(-1 * (pMatch * log2(pMatch) + pNoMatch * log2(pNoMatch)));
+            } else {
+                // do I need to add a 0? If a word is so unlikely that the target is in very few colorations, it seems
+                // I want to reduce the average.
+                probabilities.add(0.0);
             }
             return;
         }
@@ -181,6 +181,22 @@ public class Solver {
         enumerate(letters, index + 1, outcome, numChoices, probabilities);
     }
 
+    private boolean isOutcomeValid(Color[] outcome) {
+        int numGreen = 0;//= Arrays.stream(outcome).map(c -> c == Color.GREEN ? 1 : 0).reduce(0, Integer::sum);
+        int numYellow = 0;
+        for (Color c : outcome) {
+            if (c == Color.GREEN) {
+                numGreen++;
+            } else if (c == Color.YELLOW) {
+                numYellow++;
+            }
+        }
+        if (numGreen == wordLength - 1 && numYellow > 0) {
+            return false;
+        }
+        return true;
+    }
+
     private double average(List<Double> nums) {
 //        int count = 0;
 //        for (double n : nums) {
@@ -199,10 +215,8 @@ public class Solver {
     public static void main(String[] args) throws IOException {
         Solver s = new Solver(5, new IndexBuilder());
 
-        // Here is one problem:
-        // pizza is matching unzip for YYGY- and YYG--, when it should only match the latter (there aren't two z's in unzip)
-        // how do I make my matcher distinguish those?
-
+//        System.out.println("pores " + s.findAverageReduction("pizza", s.getDictionarySize()));
+//        System.out.println("pales " + s.findAverageReduction("pizza", s.getDictionarySize()));
 //        System.out.println("pizza " + s.findAverageReduction("pizza", s.getDictionarySize()));
 //        System.out.println("squaw " + s.findAverageReduction("squaw", s.getDictionarySize()));
 //        System.out.println("crane " + s.findAverageReduction("crane", s.getDictionarySize()));
@@ -213,7 +227,7 @@ public class Solver {
 //        System.out.println("stump " + s.findAverageReduction("stump", s.getDictionarySize()));
 //        System.out.println("fuzzy " + s.findAverageReduction("fuzzy", s.getDictionarySize()));
 
-        //System.out.println(s.findFirstWord());
+        System.out.println(s.findFirstWord());
     }
 
 }

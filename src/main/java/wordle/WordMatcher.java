@@ -93,6 +93,10 @@ public class WordMatcher {
             }
         }
 
+//        if (possible.size() != 0) {
+//            System.out.println(possible);
+//        }
+
         return possible.size();
     }
 
