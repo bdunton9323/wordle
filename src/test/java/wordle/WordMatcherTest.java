@@ -111,6 +111,18 @@ public class WordMatcherTest {
         assertThat(count).isEqualTo(1);
     }
 
+    @Test
+    public void testDoubleLetters() {
+        withDictionary("aba", "bab");
+        // the only way both a's can be yellow is if the target word has two A's. Not only are there no words with two
+        // A's that aren't all green, but in a 3-letter word it's not possible for both A's to be wrong.
+        int count = matcher.countMatchingWords("aba".toCharArray(), new Color[]{Color.YELLOW, Color.YELLOW, Color.YELLOW});
+        assertThat(count).isEqualTo(0);
+
+        count = matcher.countMatchingWords("aba".toCharArray(), new Color[]{Color.YELLOW, Color.YELLOW, Color.GRAY});
+        assertThat(count).isEqualTo(1);
+    }
+
     private void withDictionary(String... words) {
         when(wordIndex.getDictionaryCopy()).thenReturn(setOf(words));
     }

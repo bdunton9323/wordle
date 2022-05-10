@@ -16,6 +16,12 @@ public class WordMatcher {
             throw new IllegalArgumentException("Word length must be the same size as the color pattern");
         }
 
+        // I could speed this up by ignoring invalid cases
+        // e.g. the outcome GGGGY can never happen. The matching word set will always be empty.
+        // likewise, 'pizza' should never match 'unzip' over YYGY-
+
+        // aba bab should be YY-, not YYY
+
         Set<String> possible = new HashSet<>(index.getDictionary());
 
         // optimize for double letters

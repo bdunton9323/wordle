@@ -36,17 +36,32 @@ public class SolverTest {
 
         when(indexBuilder.buildIndex(2)).thenReturn(wordIndex);
         solver = new Solver(2, indexBuilder);
-        // gg -> 0
-        // gy -> 0
-        // g- -> 0.5
-        // yg -> 0
-        // yy -> 0
-        // y- -> 0
-        // -g -> 0
-        // -y -> 0
-        // -- -> 0.5
+        // color -> entropy (how well does it split the dictionary)
+        // GG -> 0
+        // YY -> 0
+        // G- -> 1
+        // YG -> 0
+        // YY -> 0
+        // Y- -> 0
+        // -G -> 0
+        // -Y -> 0
+        // -- -> 1
         double reduction = solver.findAverageReduction("an", 4);
-        assertThat(reduction).isEqualTo(0.1111, offset(.00002d));
+        assertThat(reduction).isEqualTo(1.0, offset(.0001d));
+
+        // the only valid colorings that can arise are:
+        // Y- -> 0.8112 (splits it 75/25)
+        // -- -> 0.8112 (splits it 75/25)
+        reduction = solver.findAverageReduction("zp", 4);
+        assertThat(reduction).isEqualTo(0.811278124, offset(.0000000005d));
+
+        // TODO: why is this guess scored worse than an? It gives more information
+        //       the GG and G- cases both include ab as a match
+        // GG -> 0.8112 (75/25 split)
+        // G- -> 0.8112 (75/25 split)
+        // -- -> 1 (50/50 split)
+        reduction = solver.findAverageReduction("ab", 4);
+        assertThat(reduction).isEqualTo(0.874185416, offset(.0000000005d));
     }
 
     @Test
@@ -59,4 +74,5 @@ public class SolverTest {
         double reduction = solver.findAverageReduction("abcdx", 4);
         assertThat(reduction).isEqualTo(0.5, offset(.01d));
     }
+
 }
