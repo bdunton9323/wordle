@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -155,6 +156,12 @@ public class WordMatcherTest {
         count = matcher.countMatchingWords("abb".toCharArray(),
                 new Color[]{Color.GRAY, Color.GREEN, Color.YELLOW});
         assertThat(count).isEqualTo(0);
+    }
+
+    @Test
+    public void testBadInputs() {
+        assertThatThrownBy(() -> matcher.countMatchingWords("abc".toCharArray(), new Color[4]))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private void withDictionary(String... words) {

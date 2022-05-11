@@ -1,5 +1,6 @@
 package wordle;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Wordle {
@@ -11,12 +12,19 @@ public class Wordle {
     private final Scanner scanner;
     private final Solver solver;
 
-    public Wordle() {
+    public Wordle() throws IOException {
         this.scanner = new Scanner(System.in);
-        this.solver = new Solver(WORD_LENGTH, new DictionaryFileLoader(DICTIONARY_PATH));
+
+        Dictionary dictionary = new DictionaryFileLoader(DICTIONARY_PATH).buildDictionary();
+        WordMatcher wordMatcher = new WordMatcher(dictionary);
+        GoodnessCalculator goodnessCalculator = new GoodnessCalculator(WORD_LENGTH, wordMatcher,
+                new EntropyCalculator());
+        this.solver = new Solver(WORD_LENGTH, dictionary, wordMatcher, goodnessCalculator);
+
+        System.out.println("Dictionary has " + dictionary.size() + " " + WORD_LENGTH + "-letter words");
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Wordle wordle = new Wordle();
         wordle.play();
     }

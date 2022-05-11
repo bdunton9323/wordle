@@ -30,7 +30,7 @@ public class Dictionary {
     }
 
     public void intersect(Set<String> wordsToRetain) {
-        // it's inefficient, but it's only done once per guess
+        // it's inefficient, but it's only done once per guess.
         Set<String> newWords = new HashSet<>(dictionary);
         newWords.retainAll(wordsToRetain);
         dictionary = new ArrayList<>(newWords);

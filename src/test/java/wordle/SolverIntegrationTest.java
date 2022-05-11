@@ -20,7 +20,7 @@ public class SolverIntegrationTest {
         DictionaryFileLoader dictLoader = new DictionaryFileLoader("/dictionary.txt");
         Dictionary dict = dictLoader.buildDictionary();
         dictSize = dict.size();
-        calculator = new GoodnessCalculator(5, new WordMatcher(dict));
+        calculator = new GoodnessCalculator(5, new WordMatcher(dict), new EntropyCalculator());
     }
 
     @Test

@@ -1,28 +1,18 @@
 package wordle;
 
-import java.io.IOException;
-
 public class Solver {
 
     private final int wordLength;
-    private final WordMatcher matcher;
     private final Dictionary dictionary;
+    private final WordMatcher matcher;
     private final GoodnessCalculator goodnessCalculator;
 
-    public Solver(int wordLength, DictionaryFileLoader dictionaryLoader) {
+    public Solver(int wordLength, Dictionary dictionary, WordMatcher wordMatcher,
+            GoodnessCalculator goodnessCalculator) {
         this.wordLength = wordLength;
-
-        try {
-            dictionary = dictionaryLoader.buildDictionary();
-        } catch (IOException e) {
-            throw new IllegalArgumentException("The dictionary could not be indexed", e);
-        }
-
-        // TODO: inject these for testability
-        matcher = new WordMatcher(dictionary);
-        goodnessCalculator = new GoodnessCalculator(wordLength, matcher);
-
-        System.out.println("Dictionary has " + dictionary.size() + " " + wordLength + "-letter words");
+        this.dictionary = dictionary;
+        this.matcher = wordMatcher;
+        this.goodnessCalculator = goodnessCalculator;
     }
 
     /**
@@ -41,7 +31,7 @@ public class Solver {
     public String findNextWord(String previousGuess, Color[] outcome) {
         dictionary.intersect(matcher.getMatchingWords(previousGuess.toCharArray(), outcome));
 
-        System.out.println("There are " + dictionary.size() + " word(s) remaining");
+        System.out.println("Getting close! Only " + dictionary.size() + " possible word(s) remaining:");
         if (dictionary.size() <= 10) {
             System.out.println("    " + dictionary.getWords());
         }
@@ -50,12 +40,12 @@ public class Solver {
     }
 
     private String findNextWord(Color[] knownColors) {
-        double bestAverage = 0.0;
-        String bestWord = null;
-
         if (dictionary.size() == 1) {
             return dictionary.getWords().get(0);
         }
+
+        double bestAverage = 0.0;
+        String bestWord = null;
 
         for (String word : dictionary.getWords()) {
 
