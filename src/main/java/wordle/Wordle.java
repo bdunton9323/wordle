@@ -3,6 +3,9 @@ package wordle;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * The entrypoint for the Wordle solver.
+ */
 public class Wordle {
 
     private static final String DICTIONARY_PATH = "/dictionary.txt";
@@ -11,11 +14,12 @@ public class Wordle {
 
     private final Scanner scanner;
     private final Solver solver;
+    private final Dictionary dictionary;
 
     public Wordle() throws IOException {
         this.scanner = new Scanner(System.in);
 
-        Dictionary dictionary = new DictionaryFileLoader(DICTIONARY_PATH).buildDictionary();
+        dictionary = new DictionaryFileLoader(DICTIONARY_PATH).buildDictionary();
         WordMatcher wordMatcher = new WordMatcher(dictionary);
         GoodnessCalculator goodnessCalculator = new GoodnessCalculator(WORD_LENGTH, wordMatcher,
                 new EntropyCalculator());
@@ -24,6 +28,9 @@ public class Wordle {
         System.out.println("Dictionary has " + dictionary.size() + " " + WORD_LENGTH + "-letter words");
     }
 
+    /**
+     * Entrypoint. No arguments expected.
+     */
     public static void main(String[] args) throws IOException {
         Wordle wordle = new Wordle();
         wordle.play();
@@ -74,7 +81,7 @@ public class Wordle {
         while (true) {
             System.out.println("Enter your starting word");
             System.out.print("> ");
-            String word = scanner.nextLine();
+            String word = scanner.nextLine().toLowerCase();
             if (word.length() != WORD_LENGTH || !isValidWord(word)) {
                 System.out.println("Invalid word.");
             } else {
@@ -83,10 +90,8 @@ public class Wordle {
         }
     }
 
-    // TODO: implement
     private boolean isValidWord(String word) {
-        // TODO: check if alphabetical, check if in dictionary
-        return true;
+        return word.matches("^[a-z]*$") && dictionary.getWords().contains(word);
     }
 
     private Color[] askColorResult(String nextWord) {
