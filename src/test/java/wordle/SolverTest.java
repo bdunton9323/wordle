@@ -37,19 +37,19 @@ public class SolverTest {
         // the only colorings that give any info are:
         // G-
         // --
-        double reduction = solver.findAverageEntropy("an");
+        double reduction = solver.findAverageEntropy("an", new Color[5]);
         assertThat(reduction).isEqualTo(0.28571, offset(.000005d));
 
         // the only colorings that give any info are:
         // Y-
         // --
-        reduction = solver.findAverageEntropy("zp");
+        reduction = solver.findAverageEntropy("zp", new Color[5]);
         assertThat(reduction).isEqualTo(0.23179, offset(.000004d));
 
         // GG
         // G-
         // --
-        reduction = solver.findAverageEntropy("ab");
+        reduction = solver.findAverageEntropy("ab", new Color[5]);
         assertThat(reduction).isEqualTo(0.37465, offset(.000001d));
     }
 
@@ -58,7 +58,7 @@ public class SolverTest {
         withDictionary(List.of("abcde", "abcdf", "lmnop", "vwxyz"));
 
         solver = new Solver(5, dictionaryFileLoader);
-        double reduction = solver.findAverageEntropy("abcdx");
+        double reduction = solver.findAverageEntropy("abcdx", new Color[5]);
         assertThat(reduction).isEqualTo(0.01102, offset(.000001d));
     }
 

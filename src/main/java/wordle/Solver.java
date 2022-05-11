@@ -27,21 +27,10 @@ public class Solver {
     }
 
     /**
-     * Calculate an optimal next word to play.
+     * Calculate an optimal next word to play, using whatever is in the dictionary at the time.
      */
-    public String findNextWord() {
-        double bestAverage = 0.0;
-        String bestWord = null;
-        for (String word : dictionary.getWords()) {
-
-            double average = findAverageEntropy(word);
-            if (average > bestAverage) {
-                bestAverage = average;
-                bestWord = word;
-                System.out.println("best so far: " + word);
-            }
-        }
-        return bestWord;
+    public String findFirstWord() {
+        return findNextWord(new Color[wordLength]);
     }
 
     /**
@@ -52,7 +41,27 @@ public class Solver {
      */
     public String findNextWord(String previousGuess, Color[] outcome) {
         dictionary.intersect(matcher.getMatchingWords(previousGuess.toCharArray(), outcome));
-        return findNextWord();
+
+        return findNextWord(outcome);
+    }
+
+    public String findNextWord(Color[] knownColors) {
+        double bestAverage = 0.0;
+        String bestWord = null;
+
+        if (dictionary.size() == 1) {
+            return dictionary.getWords().get(0);
+        }
+
+        for (String word : dictionary.getWords()) {
+
+            double average = findAverageEntropy(word, knownColors);
+            if (average > bestAverage) {
+                bestAverage = average;
+                bestWord = word;
+            }
+        }
+        return bestWord;
     }
 
     /**
@@ -61,12 +70,17 @@ public class Solver {
      * calculate the average reduction, assuming that all colorings are equally likely.
      *
      * @param guess the given guess
+     * @param knownColors the colors that are known already. Only the green ones matter.
      * @return the expected reduction of the remaining choices, as a percentage of numChoices
      */
-    double findAverageEntropy(String guess) {
+    double findAverageEntropy(String guess, Color[] knownColors) {
         // enumerate all possible coloring outcomes, and for each one, find out how many words match it.
         List<Double> entropies = new ArrayList<>(numColorings);
-        analyzePossibleOutcomes(guess.toCharArray(), 0, new Color[wordLength], dictionary.size(), entropies);
+
+        Color[] stateSpace = new Color[wordLength];
+        System.arraycopy(knownColors, 0, stateSpace, 0, wordLength);
+
+        analyzePossibleOutcomes(guess.toCharArray(), 0, stateSpace, dictionary.size(), entropies);
 
         // the average entropy of the target word
         return average(entropies);
@@ -105,26 +119,39 @@ public class Solver {
             //     - chance that the target word resulted in this color outcome,
             //     - chance that it didn't
             if (numMatching != 0) {
-                probabilities.add(-1 * (pMatch * log2(pMatch) + pNoMatch * log2(pNoMatch)));
+                double entropy = -1 * (pMatch * log2(pMatch) + pNoMatch * log2(pNoMatch));
+                if (!Double.isNaN(entropy)) {
+                    probabilities.add(entropy);
+                } else {
+                    probabilities.add(0.0);
+                }
             } else {
                 probabilities.add(0.0);
             }
             return;
         }
 
-        // use backtracking to try each of the possible colorings that can result
+        if (outcome[index] == Color.GREEN) {
+            // if we know this letter already, don't try anything else in that spot
+            analyzePossibleOutcomes(letters, index + 1, outcome, numChoices, probabilities);
+        } else {
 
-        // contains this letter
-        outcome[index] = Color.YELLOW;
-        analyzePossibleOutcomes(letters, index + 1, outcome, numChoices, probabilities);
+            // use backtracking to try each of the possible colorings that can result
 
-        // contains this letter in this position
-        outcome[index] = Color.GREEN;
-        analyzePossibleOutcomes(letters, index + 1, outcome, numChoices, probabilities);
+            // contains this letter
+            outcome[index] = Color.YELLOW;
+            analyzePossibleOutcomes(letters, index + 1, outcome, numChoices, probabilities);
 
-        // does not contain this letter
-        outcome[index] = Color.GRAY;
-        analyzePossibleOutcomes(letters, index + 1, outcome, numChoices, probabilities);
+            // contains this letter in this position
+            outcome[index] = Color.GREEN;
+            analyzePossibleOutcomes(letters, index + 1, outcome, numChoices, probabilities);
+
+            // does not contain this letter
+            outcome[index] = Color.GRAY;
+            analyzePossibleOutcomes(letters, index + 1, outcome, numChoices, probabilities);
+
+            outcome[index] = null;
+        }
     }
 
     private boolean isOutcomeValid(Color[] outcome) {
@@ -155,16 +182,16 @@ public class Solver {
     public static void main(String[] args) {
         Solver s = new Solver(5, new DictionaryFileLoader("/dictionary.txt"));
 
-        System.out.println("crane " + s.findAverageEntropy("crane"));
-        System.out.println("soare " + s.findAverageEntropy("soare"));
-        System.out.println("pores " + s.findAverageEntropy("pizza"));
-        System.out.println("pales " + s.findAverageEntropy("pizza"));
-        System.out.println("pizza " + s.findAverageEntropy("pizza"));
-        System.out.println("squaw " + s.findAverageEntropy("squaw"));
-        System.out.println("buxom " + s.findAverageEntropy("buxom"));
-        System.out.println("mamma " + s.findAverageEntropy("mamma"));
-        System.out.println("stump " + s.findAverageEntropy("stump"));
-        System.out.println("fuzzy " + s.findAverageEntropy("fuzzy"));
+        System.out.println("crane " + s.findAverageEntropy("crane", new Color[5]));
+        System.out.println("soare " + s.findAverageEntropy("soare", new Color[5]));
+        System.out.println("pores " + s.findAverageEntropy("pizza", new Color[5]));
+        System.out.println("pales " + s.findAverageEntropy("pizza", new Color[5]));
+        System.out.println("pizza " + s.findAverageEntropy("pizza", new Color[5]));
+        System.out.println("squaw " + s.findAverageEntropy("squaw", new Color[5]));
+        System.out.println("buxom " + s.findAverageEntropy("buxom", new Color[5]));
+        System.out.println("mamma " + s.findAverageEntropy("mamma", new Color[5]));
+        System.out.println("stump " + s.findAverageEntropy("stump", new Color[5]));
+        System.out.println("fuzzy " + s.findAverageEntropy("fuzzy", new Color[5]));
 
         //System.out.println(s.findFirstWord());
     }

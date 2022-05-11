@@ -27,14 +27,19 @@ public class Wordle {
 
         int guessNumber = 1;
         Color[] colors = new Color[WORD_LENGTH];
-        while (guessNumber <= NUM_GUESSES && !isSolved(colors)) {
+        while (guessNumber <= NUM_GUESSES && nextWord != null) {
             colors = askColorResult(nextWord);
+            if (isSolved(colors)) {
+                break;
+            }
             nextWord = solver.findNextWord(nextWord.toLowerCase(), colors);
 
             guessNumber++;
         }
 
-        if (isSolved(colors)) {
+        if (nextWord == null) {
+            System.out.println("Something went wrong. I could not solve this puzzle.");
+        } else if (isSolved(colors)) {
             System.out.println("Nicely done!");
         } else {
             System.out.println("Better luck next time :(");
@@ -44,8 +49,7 @@ public class Wordle {
     private String getFirstWord() {
         if (shouldCalculateFirst()) {
             System.out.println("Calculating first word. This may take a few minutes...");
-            //return solver.findNextWord();
-            return "tares";
+            return solver.findFirstWord();
         } else {
             return promptFirstWord();
         }
@@ -82,7 +86,7 @@ public class Wordle {
         if (nextWord != null) {
             System.out.print("'" + nextWord + "' ");
         }
-        System.out.print("into the game and tell me the color result");
+        System.out.println("into the game and tell me the color result");
         System.out.println("Use 'G' for green, 'Y' for yellow, and '-' for gray, with no spaces in between");
         System.out.println("Example: --Y-G");
 
