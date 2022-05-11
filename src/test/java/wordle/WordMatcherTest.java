@@ -14,14 +14,14 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 public class WordMatcherTest {
     @Mock
-    private WordIndex wordIndex;
+    private Dictionary dictionary;
 
     private WordMatcher matcher;
 
     @Before
     public void setUp() {
         openMocks(this);
-        matcher = new WordMatcher(wordIndex);
+        matcher = new WordMatcher(dictionary);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class WordMatcherTest {
     }
 
     private void withDictionary(String... words) {
-        when(wordIndex.getDictionary()).thenReturn(listOf(words));
+        when(dictionary.getWords()).thenReturn(listOf(words));
     }
 
     private List<String> listOf(String... items) {

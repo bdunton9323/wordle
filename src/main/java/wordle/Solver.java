@@ -8,44 +8,39 @@ public class Solver {
 
     private final int wordLength;
     private final int numColorings;
-
-    private final WordIndex index;
     private final WordMatcher matcher;
+    private Dictionary dictionary;
 
-    public Solver(int wordLength, IndexBuilder indexBuilder) {
+    public Solver(int wordLength, DictionaryFileLoader dictionaryLoader) {
         this.wordLength = wordLength;
         numColorings = (int) Math.pow(3, wordLength);
 
         try {
-            index = indexBuilder.buildIndex(wordLength);
+            dictionary = dictionaryLoader.buildDictionary();
         } catch (IOException e) {
             throw new IllegalArgumentException("The dictionary could not be indexed", e);
         }
 
-        matcher = new WordMatcher(index);
+        matcher = new WordMatcher(dictionary);
 
-        System.out.println("Dictionary has " + index.getDictionarySize() + " " + wordLength + "-letter words");
-    }
-
-    public int getDictionarySize() {
-        return index.getDictionarySize();
+        System.out.println("Dictionary has " + dictionary.size() + " " + wordLength + "-letter words");
     }
 
     /**
-     * Calculate an optimal first word to play.
+     * Calculate an optimal next word to play.
      */
-    public String findFirstWord() {
+    public String findNextWord() {
         int tryNum = 0;
 
         double bestAverage = 0.0;
         String bestWord = null;
-        for (String word : index.getDictionary()) {
+        for (String word : dictionary.getWords()) {
             tryNum++;
             if (tryNum % 20 == 0) {
                 System.out.println("trying word #" + tryNum);
             }
 
-            double average = findAverageEntropy(word, index.getDictionarySize());
+            double average = findAverageEntropy(word);
             if (average > bestAverage) {
                 bestAverage = average;
                 bestWord = word;
@@ -56,18 +51,28 @@ public class Solver {
     }
 
     /**
+     * Filters the dictionary to match a given outcome from the game. After the game provides the colors as feedback,
+     * the only possible words are the ones given.
+     *
+     * @param outcome the colors that the game provided.
+     */
+//    public String findNextWord(Color[] outcome) {
+//        dictionary = new Dictionary(matcher.findMatchingWords(outcome));
+//        return findNextWord();
+//    }
+
+    /**
      * If we guess the given word, the remaining choices will be reduced by some amount. Since we don't know the target
      * word, we don't know that amount. Assuming the target word is selected at random from the dictionary, then we can
      * calculate the average reduction, assuming that all colorings are equally likely.
      *
      * @param guess the given guess
-     * @param numChoices the number of choices out of which this guess was selected
      * @return the expected reduction of the remaining choices, as a percentage of numChoices
      */
-    double findAverageEntropy(String guess, int numChoices) {
+    double findAverageEntropy(String guess) {
         // enumerate all possible coloring outcomes, and for each one, find out how many words match it.
         List<Double> entropies = new ArrayList<>(numColorings);
-        analyzePossibleOutcomes(guess.toCharArray(), 0, new Color[wordLength], numChoices, entropies);
+        analyzePossibleOutcomes(guess.toCharArray(), 0, new Color[wordLength], dictionary.size(), entropies);
 
         // the average entropy of the target word
         return average(entropies);
@@ -153,19 +158,19 @@ public class Solver {
         return Math.log(n) / Math.log(2);
     }
 
-    public static void main(String[] args) throws IOException {
-        Solver s = new Solver(5, new IndexBuilder());
+    public static void main(String[] args) {
+        Solver s = new Solver(5, new DictionaryFileLoader());
 
-        System.out.println("crane " + s.findAverageEntropy("crane", s.getDictionarySize()));
-        System.out.println("soare " + s.findAverageEntropy("soare", s.getDictionarySize()));
-        System.out.println("pores " + s.findAverageEntropy("pizza", s.getDictionarySize()));
-        System.out.println("pales " + s.findAverageEntropy("pizza", s.getDictionarySize()));
-        System.out.println("pizza " + s.findAverageEntropy("pizza", s.getDictionarySize()));
-        System.out.println("squaw " + s.findAverageEntropy("squaw", s.getDictionarySize()));
-        System.out.println("buxom " + s.findAverageEntropy("buxom", s.getDictionarySize()));
-        System.out.println("mamma " + s.findAverageEntropy("mamma", s.getDictionarySize()));
-        System.out.println("stump " + s.findAverageEntropy("stump", s.getDictionarySize()));
-        System.out.println("fuzzy " + s.findAverageEntropy("fuzzy", s.getDictionarySize()));
+        System.out.println("crane " + s.findAverageEntropy("crane"));
+        System.out.println("soare " + s.findAverageEntropy("soare"));
+        System.out.println("pores " + s.findAverageEntropy("pizza"));
+        System.out.println("pales " + s.findAverageEntropy("pizza"));
+        System.out.println("pizza " + s.findAverageEntropy("pizza"));
+        System.out.println("squaw " + s.findAverageEntropy("squaw"));
+        System.out.println("buxom " + s.findAverageEntropy("buxom"));
+        System.out.println("mamma " + s.findAverageEntropy("mamma"));
+        System.out.println("stump " + s.findAverageEntropy("stump"));
+        System.out.println("fuzzy " + s.findAverageEntropy("fuzzy"));
 
         //System.out.println(s.findFirstWord());
     }

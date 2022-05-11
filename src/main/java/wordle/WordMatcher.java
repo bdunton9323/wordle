@@ -6,22 +6,16 @@ import java.util.Set;
 
 public class WordMatcher {
 
-    private final WordIndex index;
+    private final Dictionary dictionary;
 
-    public WordMatcher(WordIndex index) {
-        this.index = index;
+    public WordMatcher(Dictionary dictionary) {
+        this.dictionary = dictionary;
     }
 
     public int countMatchingWords(char[] letters, Color[] outcome) {
         if (letters.length != outcome.length) {
             throw new IllegalArgumentException("Word length must be the same size as the color pattern");
         }
-
-        // should probably do this in the pattern generator code. some cases can never happen:
-        // e.g. GGGGY, GYGGG, ...
-//        if (isInvalid(outcome)) {
-//            return 0;
-//        }
 
 
         // apply the colors one by one
@@ -30,18 +24,6 @@ public class WordMatcher {
         //      freeze the count so that a future yellow doesn't increase it
         // if I see a yellow, add one to the occurrences, and filter the set to the words with that many
         // if I see a green, increase the count, even if it's frozen.
-        //
-        // if guess is CCA and pattern is Y-Y, and dictionary has ABC:
-        // 0: Yellow, so occur(C) = 1. Retain words with 1 or more C's.
-        // 1: Gray, so freeze occur(C) at 1. Retain words with exactly occur(C) C's.
-        // 2: Yellow, so occur(A) = 1. Retain all words with 1 or more A's.
-
-        // can I detect this case up front? Can I do the tallying up front and make the filtering easier?
-        // if guess is CCAA and pattern is YY-Y, and dictionary has XXCC:
-        // 0: Yellow, so occur(C) = 1. Retain words with 1 or more C's.
-        // 1: Yellow, so occur(C) = 2. Retain words with 2 or more C's.
-        // 2: Gray, so freeze occur(A) at 0. Remove all words with any A's.
-        // 3: Yellow, but occur(A) is frozen at 0. There are no more words in the set with an A, return empty.
 
         int[] occur = new int[26];
         boolean[] frozen = new boolean[26];
@@ -64,14 +46,13 @@ public class WordMatcher {
             }
         }
 
-        Set<String> possible = new HashSet<>(index.getDictionary());
+        Set<String> possible = new HashSet<>(dictionary.getWords());
 
         for (int i = 0; i < occur.length; i++) {
             char letter = (char) (i + 'a');
 
             if (occur[i] == 0) {
-                // TODO: this needs to distinguish between "this letter really does not appear"
-                //       vs. "this letter was not in the target so we don't know if it appears"
+                // if we know a letter doesn't appear (vs. not having any info about it), we will have seen a gray
                 if (frozen[i]) {
                     removeWordsWithLetter(letter, possible);
                 }
@@ -92,10 +73,6 @@ public class WordMatcher {
                 retainWordsWithExactLetter(letters[i], i, possible);
             }
         }
-
-//        if (possible.size() != 0) {
-//            System.out.println(possible);
-//        }
 
         return possible.size();
     }

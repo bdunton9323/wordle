@@ -4,27 +4,27 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class IndexBuilder {
+public class DictionaryFileLoader {
 
     private static final String DICTIONARY_PATH = "/dictionary.txt";
 
     /**
-     * Builds a WordIndex for the given dictionary file. The dictionary is expected to have only words of the target length;
+     * Builds a Dictionary for the given dictionary file. The dictionary is expected to have only words of the target
+     * length;
      *
-     * @param wordLength the length of words in the dictionary
      */
-    public WordIndex buildIndex(int wordLength) throws IOException {
-        WordIndex index = new WordIndex(wordLength);
+    public Dictionary buildDictionary() throws IOException {
+        Dictionary dictionary = new Dictionary();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 this.getClass().getResourceAsStream(DICTIONARY_PATH)))) {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                index.indexWord(line);
+                dictionary.addWord(line);
             }
         }
 
-        return index;
+        return dictionary;
     }
 }
