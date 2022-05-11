@@ -11,29 +11,30 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-public class SolverTest {
+public class GoodnessCalculatorTest {
 
     @Mock
-    private DictionaryFileLoader dictionaryFileLoader;
-
-    @Mock
-    private Dictionary dictionary;
-
-    private Solver solver;
+    private WordMatcher matcher;
 
     @Before
     public void setUp() throws IOException {
         openMocks(this);
-        when(dictionaryFileLoader.buildDictionary()).thenReturn(dictionary);
     }
 
     // TODO: add a test for single letters. they are easier to predict the calculations.
+
+
+    @Test
+    public void testGoodWord() {
+        when(matcher.countMatchingWords())
+    }
+
 
     @Test
     public void test2Letters() throws IOException {
         withDictionary(List.of("ab", "ac", "xy", "xz"));
 
-        solver = new Solver(2, dictionaryFileLoader);
+        GoodnessCalculator calculator = new GoodnessCalculator(2, matcher);
         // the only colorings that give any info are:
         // G-
         // --
@@ -60,11 +61,6 @@ public class SolverTest {
         solver = new Solver(5, dictionaryFileLoader);
         double reduction = solver.findAverageEntropy("abcdx", new Color[5]);
         assertThat(reduction).isEqualTo(0.01102, offset(.000001d));
-    }
-
-    private void withDictionary(List<String> words) {
-        when(dictionary.getWords()).thenReturn(words);
-        when(dictionary.size()).thenReturn(words.size());
     }
 
 }
