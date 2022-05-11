@@ -6,6 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Contains the set of words that are possible at any given point in the game.
+ */
 public class Dictionary {
     private List<String> dictionary;
 

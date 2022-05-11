@@ -1,5 +1,8 @@
 package wordle;
 
+/**
+ * Represents a color that can be returned from the game
+ */
 public enum Color {
     GREEN("G"),
     YELLOW("Y"),
