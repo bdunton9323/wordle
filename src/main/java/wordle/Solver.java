@@ -42,6 +42,11 @@ public class Solver {
     public String findNextWord(String previousGuess, Color[] outcome) {
         dictionary.intersect(matcher.getMatchingWords(previousGuess.toCharArray(), outcome));
 
+        System.out.println("There are " + dictionary.size() + " word(s) remaining");
+        if (dictionary.size() <= 10) {
+            System.out.println("    " + dictionary.getWords());
+        }
+
         return findNextWord(outcome);
     }
 
