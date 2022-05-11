@@ -9,9 +9,11 @@ public class Wordle {
     private static final int NUM_GUESSES = 6;
 
     private final Scanner scanner;
+    private final Solver solver;
 
     public Wordle() {
         this.scanner = new Scanner(System.in);
+        this.solver = new Solver(WORD_LENGTH, new DictionaryFileLoader(DICTIONARY_PATH));
     }
 
     public static void main(String[] args) {
@@ -20,22 +22,15 @@ public class Wordle {
     }
 
     private void play() {
-        Solver solver = new Solver(WORD_LENGTH, new DictionaryFileLoader(DICTIONARY_PATH));
 
-        String nextWord = "";
-
-        boolean findFirst = promptFirstWord();
-        if (findFirst) {
-            System.out.println("Calculating first word. This may take a few minutes...");
-            String firstWord = solver.findNextWord();
-            nextWord = "tares";
-        }
+        String nextWord = getFirstWord();
 
         int guessNumber = 1;
         Color[] colors = new Color[WORD_LENGTH];
         while (guessNumber <= NUM_GUESSES && !isSolved(colors)) {
             colors = askColorResult(nextWord);
-            nextWord = solver.findNextWord(colors);
+            nextWord = solver.findNextWord(nextWord.toLowerCase(), colors);
+
             guessNumber++;
         }
 
@@ -46,15 +41,48 @@ public class Wordle {
         }
     }
 
-    private boolean promptFirstWord() {
+    private String getFirstWord() {
+        if (shouldCalculateFirst()) {
+            System.out.println("Calculating first word. This may take a few minutes...");
+            //return solver.findNextWord();
+            return "tares";
+        } else {
+            return promptFirstWord();
+        }
+    }
+
+    private boolean shouldCalculateFirst() {
         System.out.println("Do you want me to choose your first word? (Y/N)");
         System.out.print("> ");
         String answer = scanner.nextLine();
         return answer.equals("Y") || answer.equals("y");
     }
 
+    private String promptFirstWord() {
+        while (true) {
+            System.out.println("Enter your starting word");
+            System.out.print("> ");
+            String word = scanner.nextLine();
+            if (word.length() != WORD_LENGTH || !isValidWord(word)) {
+                System.out.println("Invalid word.");
+            } else {
+                return word;
+            }
+        }
+    }
+
+    // TODO: implement
+    private boolean isValidWord(String word) {
+        // TODO: check if alphabetical, check if in dictionary
+        return true;
+    }
+
     private Color[] askColorResult(String nextWord) {
-        System.out.println("Enter the word " + nextWord + " into the game and tell me the color result");
+        System.out.print("Enter the word ");
+        if (nextWord != null) {
+            System.out.print("'" + nextWord + "' ");
+        }
+        System.out.print("into the game and tell me the color result");
         System.out.println("Use 'G' for green, 'Y' for yellow, and '-' for gray, with no spaces in between");
         System.out.println("Example: --Y-G");
 

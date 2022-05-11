@@ -9,7 +9,7 @@ public class Solver {
     private final int wordLength;
     private final int numColorings;
     private final WordMatcher matcher;
-    private Dictionary dictionary;
+    private final Dictionary dictionary;
 
     public Solver(int wordLength, DictionaryFileLoader dictionaryLoader) {
         this.wordLength = wordLength;
@@ -30,15 +30,9 @@ public class Solver {
      * Calculate an optimal next word to play.
      */
     public String findNextWord() {
-        int tryNum = 0;
-
         double bestAverage = 0.0;
         String bestWord = null;
         for (String word : dictionary.getWords()) {
-            tryNum++;
-            if (tryNum % 20 == 0) {
-                System.out.println("trying word #" + tryNum);
-            }
 
             double average = findAverageEntropy(word);
             if (average > bestAverage) {
@@ -56,8 +50,8 @@ public class Solver {
      *
      * @param outcome the colors that the game provided.
      */
-    public String findNextWord(Color[] outcome) {
-        dictionary = new Dictionary(matcher.getMatchingWords(outcome));
+    public String findNextWord(String previousGuess, Color[] outcome) {
+        dictionary.intersect(matcher.getMatchingWords(previousGuess.toCharArray(), outcome));
         return findNextWord();
     }
 
