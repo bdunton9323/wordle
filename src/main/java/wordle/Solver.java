@@ -56,10 +56,10 @@ public class Solver {
      *
      * @param outcome the colors that the game provided.
      */
-//    public String findNextWord(Color[] outcome) {
-//        dictionary = new Dictionary(matcher.findMatchingWords(outcome));
-//        return findNextWord();
-//    }
+    public String findNextWord(Color[] outcome) {
+        dictionary = new Dictionary(matcher.getMatchingWords(outcome));
+        return findNextWord();
+    }
 
     /**
      * If we guess the given word, the remaining choices will be reduced by some amount. Since we don't know the target
@@ -159,7 +159,7 @@ public class Solver {
     }
 
     public static void main(String[] args) {
-        Solver s = new Solver(5, new DictionaryFileLoader());
+        Solver s = new Solver(5, new DictionaryFileLoader("/dictionary.txt"));
 
         System.out.println("crane " + s.findAverageEntropy("crane"));
         System.out.println("soare " + s.findAverageEntropy("soare"));

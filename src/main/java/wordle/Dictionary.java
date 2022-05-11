@@ -12,7 +12,7 @@ public class Dictionary {
     }
 
     public Dictionary(List<String> words) {
-        this.dictionary = words;
+        this.dictionary = new ArrayList<>(words);
     }
 
     public void addWord(String word) {

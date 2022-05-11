@@ -6,7 +6,11 @@ import java.io.InputStreamReader;
 
 public class DictionaryFileLoader {
 
-    private static final String DICTIONARY_PATH = "/dictionary.txt";
+    private final String filePath;
+
+    public DictionaryFileLoader(String filePath) {
+        this.filePath = filePath;
+    }
 
     /**
      * Builds a Dictionary for the given dictionary file. The dictionary is expected to have only words of the target
@@ -17,7 +21,7 @@ public class DictionaryFileLoader {
         Dictionary dictionary = new Dictionary();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                this.getClass().getResourceAsStream(DICTIONARY_PATH)))) {
+                this.getClass().getResourceAsStream(filePath)))) {
 
             String line;
             while ((line = reader.readLine()) != null) {

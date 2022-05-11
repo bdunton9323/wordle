@@ -13,10 +13,13 @@ public class WordMatcher {
     }
 
     public int countMatchingWords(char[] letters, Color[] outcome) {
+        return getMatchingWords(letters, outcome).size();
+    }
+
+    public Set<String> getMatchingWords(char[] letters, Color[] outcome) {
         if (letters.length != outcome.length) {
             throw new IllegalArgumentException("Word length must be the same size as the color pattern");
         }
-
 
         // apply the colors one by one
         // tally the occurrences of each letter as it is processed -> occur(letter)
@@ -37,7 +40,7 @@ public class WordMatcher {
                 // if we see a letter yellow after seeing it gray, then this is an invalid
                 // coloring. We will see the canonical form of this coloring eventually.
                 if (frozen[letterIdx]) {
-                    return 0;
+                    return Set.of();
                 } else {
                     occur[letterIdx]++;
                 }
@@ -74,7 +77,7 @@ public class WordMatcher {
             }
         }
 
-        return possible.size();
+        return possible;
     }
 
 
