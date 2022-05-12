@@ -71,7 +71,8 @@ public class Wordle {
     }
 
     private boolean shouldCalculateFirst() {
-        System.out.println("Do you want me to choose your first word? (Y/N)");
+        System.out.println("Do you want me to choose an optimal first word? This may take several minutes. (Y/N)");
+        System.out.println("    (Note: the optimal word will be consistent for a given dictionary, so if you know the word then skip this)");
         System.out.print("> ");
         String answer = scanner.nextLine();
         return answer.equals("Y") || answer.equals("y");
